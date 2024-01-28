@@ -19,12 +19,12 @@ Get started with scrapy: https://docs.scrapy.org/en/latest/intro/tutorial.html
 To help you building the scraping, use the scrapy shell (an interactive scraping shell) to work with the HTML files. The scrapy CLI allows you to use absolute paths. Go to the root of this repo and run the following to open up the local HTML file:
 
 ```
-scrapy shell  "https://en.wikipedia.org/wiki/Sport"
+scrapy  "https://en.wikipedia.org/wiki/Sport"
 ```
 
 Note that the quotes are required for the shell to work and escape the single quote within the HTML page. The shell uses a IPython as the shell (Jupyter-like output in the terminal) so be aware that when copying and pasting, you might need to reformat.
 
-Confirm that the `response.url` points to the local path:
+Confirm that the `response` points to the local path:
 
 ```
 In [1]: response
@@ -95,16 +95,43 @@ In [29]: with open ('data.json','w') as f:
 
  ```
 
- So the `b` tag is showing "Bronze". Update the loop to use the value of the `b` tag instead of the `bgcolor` value:
+ Saving data to CSV file :
 
  ```
- In [81]: for tr in table.xpath('tr'):
-             print(tr.xpath('td/b/text()').extract()[0],
-             tr.xpath('td/a/text()').extract()[0]
-             )
+In [30]: import csv
 
-Gold Steve Smith
-Silver Tim Forsyth
-Bronze Takahiro Kimino
+In [31]: column_names = ["Rank", "Sport","EG","Influence"]
+In [35]: rows=[]
+    ...: for count,row in enumerate(response.xpath('//table//tbody//tr')[1:]):
+    ...:     Rank=count+1
+    ...:     Sport= row.xpath('td[1]//text()').extract_first()
+    ...:     EstimatedGlobalFollowing = row.xpath('td[2]//text()').extract_first()
+    ...:     SphereofInfluence= row.xpath('td[3]//text()').extract_first()
+    ...:     rows.append([Rank,Sport,EstimatedGlobalFollowing,SphereofInfluence])
+    ...:     if count ==9:
+    ...:         break
+    ...:
+
+In [36]: rows
+Out[36]:
+[[1, 'Association football', '4 billion', 'Globally\n'],
+ [2, 'Cricket', '2.5 billion', 'primarily '],
+ [3, 'Hockey', '2 billion', 'Europe'],
+ [4, 'Tennis', '1 billion', 'Globally\n'],
+ [5, 'Volleyball', '900 million', 'Americas, Europe, Asia, Oceania\n'],
+ [6, 'Table tennis', '875 million', 'Mainly East Asia\n'],
+ [7, 'Basketball', '825 million', 'Globally\n'],
+ [8, 'Baseball', '500 million', 'primarily '],
+ [9,
+  'Rugby',
+  '475 million',
+  'primarily UK, Ireland, France, Italy, Oceania, South Africa, Argentina, and Japan.\n'],
+ [10, 'Golf', '450 million', 'primarily Western Europe, ']]
+
+In[37]: with open("data.csv", "w") as f:
+    ...:     writer = csv.writer(f)
+    ...:     writer.writerow(column_names)
+    ...:     writer.writerow(rows)
+    ...:
 ```
 
